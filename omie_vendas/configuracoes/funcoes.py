@@ -7,6 +7,7 @@ import requests
 import json
 import os
 import io
+from pathlib import Path
 
 ## FUNÇÃO PARA CARREGAR AQUIVO YAML
 def load_yaml():
@@ -16,7 +17,14 @@ def load_yaml():
     project_id = config['project-id']
     project_name = config['project-name']
     cloud = config['cloud']
-    credentials_path = config['credentials-path']
+    credentials_spec = (
+        os.getenv("GCS_CREDENTIALS_JSON_PATH")
+        or os.getenv("MACHTOOLS_JSON_PATH")
+        or os.getenv("GOOGLE_APPLICATION_CREDENTIALS")
+        or config.get('credentials-path')
+        or "machtools.json"
+    )
+    credentials_path = str(_resolver_caminho_credencial(credentials_spec))
     bucket_projeto = config['bucket-projeto']
     bucket_raw = config['bucket-raw']
     bucket_silver = config['bucket-silver']
@@ -36,6 +44,21 @@ def load_yaml():
         'bucket_processed' : bucket_processed,
         'bucket_dw' : bucket_dw,
     }
+
+
+def _resolver_caminho_credencial(raw_path: str) -> Path:
+    spec = (raw_path or "").strip().strip('"').strip("'")
+    if not spec:
+        spec = "machtools.json"
+    p = Path(spec).expanduser()
+    if p.is_absolute():
+        return p
+    repo_root = Path(__file__).resolve().parent.parent.parent
+    candidatos = [Path.cwd() / p, repo_root / p]
+    for cand in candidatos:
+        if cand.exists():
+            return cand
+    return repo_root / p
 
 ## FUNÇÃO PARA CONSULTAR ENDPOINT NFSE
 def endpoint_nfse(nr_pagina):

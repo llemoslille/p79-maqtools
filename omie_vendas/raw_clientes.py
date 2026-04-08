@@ -73,6 +73,35 @@ def carregar_config() -> dict:
         raise
 
 
+def resolver_caminho_credencial(raw_path: str) -> Path:
+    """
+    Resolve caminho de credencial com fallback para diferentes bases.
+    Suporta execução com cwd em `omie_vendas/` e credencial na raiz do repo.
+    """
+    spec = (raw_path or "").strip().strip('"').strip("'")
+    if not spec:
+        spec = "machtools.json"
+
+    p = Path(spec).expanduser()
+    if p.is_absolute():
+        return p
+
+    repo_root = Path(__file__).resolve().parent.parent
+    omie_vendas_dir = Path(__file__).resolve().parent
+
+    candidatos = [
+        Path.cwd() / p,
+        omie_vendas_dir / p,
+        repo_root / p,
+    ]
+    for cand in candidatos:
+        if cand.exists():
+            return cand
+
+    # Mantém último fallback previsível para mensagem de erro.
+    return repo_root / p
+
+
 def normalizar_dados(dados: Any) -> Any:
     """
     Normaliza dados convertendo objetos vazios em None para compatibilidade com Parquet.
@@ -123,10 +152,14 @@ def salvar_gcs(
         subpasta = partes[-1] if partes else "clientes"
 
     # Caminho para as credenciais do GCS (usa do config.yaml se disponível)
-    if "credentials-path" in config and config["credentials-path"]:
-        credentials_path = Path(config["credentials-path"])
-    else:
-        credentials_path = Path(__file__).resolve().parent.parent / "machtools.json"
+    credentials_spec = (
+        (os.getenv("GCS_CREDENTIALS_JSON_PATH") or "").strip()
+        or (os.getenv("MACHTOOLS_JSON_PATH") or "").strip()
+        or (os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or "").strip()
+        or (config.get("credentials-path") or "").strip()
+        or "machtools.json"
+    )
+    credentials_path = resolver_caminho_credencial(credentials_spec)
 
     if not credentials_path.exists():
         logger.error(

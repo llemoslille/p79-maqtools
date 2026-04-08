@@ -23,7 +23,6 @@ if %ERRORLEVEL%==0 (
   py "%MAIN%" %*
   set "EXITCODE=%ERRORLEVEL%"
   echo == Fim: omie_estoque (exit_code=%EXITCODE%) ==
-  pause
   exit /b %EXITCODE%
 )
 
@@ -32,10 +31,8 @@ if %ERRORLEVEL%==0 (
   python "%MAIN%" %*
   set "EXITCODE=%ERRORLEVEL%"
   echo == Fim: omie_estoque (exit_code=%EXITCODE%) ==
-  pause
   exit /b %EXITCODE%
 )
 
 echo [ERRO] Nem 'py' nem 'python' encontrados no PATH.
-pause
 exit /b 1

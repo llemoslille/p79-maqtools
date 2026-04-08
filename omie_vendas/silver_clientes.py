@@ -6,13 +6,14 @@ import sys
 from pathlib import Path
 from typing import Optional
 import io
+import os
 
 import pandas as pd
 import numpy as np
 from google.cloud import storage
 
 from configuracoes.setup_logging import get_logger as setup_logger
-from raw_clientes import carregar_config
+from raw_clientes import carregar_config, resolver_caminho_credencial
 
 # Função helper para print seguro no Windows (mesma do bronze)
 def safe_print(*args, **kwargs):
@@ -47,6 +48,17 @@ def safe_print(*args, **kwargs):
 logger = setup_logger(__name__)
 
 
+def obter_caminho_credencial(config: dict) -> Path:
+    credentials_spec = (
+        (os.getenv("GCS_CREDENTIALS_JSON_PATH") or "").strip()
+        or (os.getenv("MACHTOOLS_JSON_PATH") or "").strip()
+        or (os.getenv("GOOGLE_APPLICATION_CREDENTIALS") or "").strip()
+        or (config.get("credentials-path") or "").strip()
+        or "machtools.json"
+    )
+    return resolver_caminho_credencial(credentials_spec)
+
+
 def salvar_gcs_silver(df: pd.DataFrame, subpasta: str = "clientes"):
     """
     Salva o DataFrame processado na camada silver do GCS em formato Parquet.
@@ -60,11 +72,7 @@ def salvar_gcs_silver(df: pd.DataFrame, subpasta: str = "clientes"):
     """
     config = carregar_config()
 
-    # Caminho para as credenciais do GCS (usa do config.yaml se disponível)
-    if "credentials-path" in config and config["credentials-path"]:
-        credentials_path = Path(config["credentials-path"])
-    else:
-        credentials_path = Path(__file__).resolve().parent.parent / "machtools.json"
+    credentials_path = obter_caminho_credencial(config)
     
     if not credentials_path.exists():
         logger.error(f"Arquivo de credenciais não encontrado: {credentials_path}")
@@ -114,11 +122,7 @@ def listar_arquivos_gcs(subpasta: str = "clientes"):
     """
     config = carregar_config()
 
-    # Caminho para as credenciais do GCS
-    if "credentials-path" in config and config["credentials-path"]:
-        credentials_path = Path(config["credentials-path"])
-    else:
-        credentials_path = Path(__file__).resolve().parent.parent / "machtools.json"
+    credentials_path = obter_caminho_credencial(config)
     
     client = storage.Client.from_service_account_json(str(credentials_path))
     bucket_name = (config.get("bucket-raw") or "").strip()
@@ -162,11 +166,7 @@ def ler_arquivo_gcs(caminho_arquivo: str):
     """
     config = carregar_config()
 
-    # Caminho para as credenciais do GCS
-    if "credentials-path" in config and config["credentials-path"]:
-        credentials_path = Path(config["credentials-path"])
-    else:
-        credentials_path = Path(__file__).resolve().parent.parent / "machtools.json"
+    credentials_path = obter_caminho_credencial(config)
     
     client = storage.Client.from_service_account_json(str(credentials_path))
     bucket_name = (config.get("bucket-raw") or "").strip()

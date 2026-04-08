@@ -1,0 +1,20 @@
+# ETL Omie (vendas + estoque): principais libs de terceiros
+numpy==2.2.2
+pandas==2.2.3
+pyarrow==19.0.1
+requests==2.32.3
+
+# Google Cloud (GCS, BigQuery, service account)
+google-auth==2.38.0
+google-cloud-bigquery==3.27.0
+google-cloud-storage==2.19.0
+
+# Config / credenciais
+python-dotenv==1.0.1
+PyYAML==6.0.2
+
+# Power BI / Microsoft (atualiza_dataset)
+msal==1.31.1
+
+# Logging (omie_vendas/configuracoes/setup_logging.py)
+loguru==0.7.3

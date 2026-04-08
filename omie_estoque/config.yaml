@@ -1,0 +1,9 @@
+project-id: machtools
+project-name: machtools 
+cloud: gcp
+credentials-path: machtools.json
+bucket-projeto: maq_prod_estoque
+bucket-bronze: bronze
+bucket-silver: silver
+bucket-gold: gold
+bucket-dw: dw_machtools

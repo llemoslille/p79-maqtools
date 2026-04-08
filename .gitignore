@@ -1,0 +1,41 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+.venv/
+
+# Ambiente e segredos (arquivo .env, não pasta)
+.env
+.env.*
+
+# Logs e dados locais
+logs/
+data/
+*.csv
+
+# ETL omie_estoque: parquet/CSVs gerados entre camadas (GCS não substitui estes paths no código atual)
+omie_estoque/maq_prod_estoque/
+
+# Credenciais GCP (service account JSON — nunca commitar)
+/machtools.json
+omie_vendas/machtools.json
+omie_vendas/configuracoes/machtools.json
+omie_estoque/machtools.json
+
+# IDE
+.vscode/
+
+# Só descomente se existir pasta experimental na raiz do repo.
+# NÃO use "novo_projeto/" solto: isso ignoraria também omie_estoque/novo_projeto/ (código do ETL).
+# /novo_projeto/
+
+# Extensões: use *.ext — ".ext" ignora só arquivo com nome exatamente ".ext"
+# Descomente só o que fizer sentido (muito *.json/*.yaml pode esconder configs que você quer commitar)
+# *.json
+# *.yaml
+# *.yml
+# *.xml
+# *.html
+# *.css
+# *.js
+# *.ts

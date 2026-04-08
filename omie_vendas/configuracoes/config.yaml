@@ -1,0 +1,10 @@
+project-id: machtools
+project-name: machtools 
+cloud: gcp
+credentials-path: machtools.json
+bucket-projeto: obras_mv
+bucket-raw: raw_machtools
+bucket-silver: silver_machtools
+bucket-gold: gold_machtools
+bucket-processed: processed_machtools
+bucket-dw: dw_machtools

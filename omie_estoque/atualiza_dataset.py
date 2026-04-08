@@ -4,8 +4,12 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 from msal import ConfidentialClientApplication
+from logger_config import obter_logger
 
 load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+
+# Configurar logging
+logger = obter_logger("atualiza_dataset.py")
 
 TENANT_ID = (os.environ.get("POWERBI_TENANT_ID") or "").strip()
 CLIENT_ID = (os.environ.get("POWERBI_CLIENT_ID") or "").strip()
@@ -22,10 +26,9 @@ MISSING = [n for n, v in [
                             ("DATASET_ID_REPOSICAO", DATASET_ID_REPOSICAO),
                         ] if not v]
 if MISSING:
-    print(
-        "[AVISO] Power BI: variaveis ausentes ("
-        + ", ".join(MISSING)
-        + "). Atualizacao de datasets ignorada; defina no .env (raiz do repo) se precisar refrescar."
+    logger.warning(
+        "Power BI: variaveis ausentes (%s). Atualizacao de datasets ignorada; defina no .env (raiz do repo) se precisar refrescar.",
+        ", ".join(MISSING),
     )
     raise SystemExit(0)
 
@@ -50,19 +53,20 @@ headers = {
 }
 
 # Atualizar cada dataset
+logger.info("Iniciando atualização dos datasets do Power BI")
 for dataset_key, dataset_id in DATASET_ID.items():
-    print(f'\nAtualizando Dataset {dataset_key} (ID: {dataset_id})...')
+    logger.info(f'Atualizando Dataset {dataset_key} (ID: {dataset_id})...')
 
     # Chamada para atualizar o dataset
     refresh_url = f'https://api.powerbi.com/v1.0/myorg/groups/{GROUP_ID}/datasets/{dataset_id}/refreshes'
     response = requests.post(refresh_url, headers=headers)
 
     if response.status_code == 202:
-        print(
-            f'[OK] Dataset {dataset_key} - Atualização iniciada com sucesso!')
+        logger.info(
+            f'Dataset {dataset_key} - Atualização iniciada com sucesso!')
     else:
-        print(
+        logger.error(
             f'[ERRO] Dataset {dataset_key} - Erro ao iniciar atualização: {response.status_code}')
-        print(f'   Resposta: {response.text}')
+        logger.error(f'Resposta: {response.text}')
 
-print('\n[SUCESSO] Processo de atualização concluído!')
+logger.info('Processo de atualização dos datasets concluído!')

@@ -19,11 +19,11 @@ CLIENT_SECRET = (os.environ.get("POWERBI_CLIENT_SECRET") or "").strip()
 GROUP_ID = (os.environ.get("POWERBI_GROUP_ID") or "").strip()
 
 MISSING = [n for n, v in [
-                            ("POWERBI_TENANT_ID", TENANT_ID),
-                            ("POWERBI_CLIENT_ID", CLIENT_ID),
-                            ("POWERBI_CLIENT_SECRET", CLIENT_SECRET),
-                            ("POWERBI_GROUP_ID", GROUP_ID),
-                        ] if not v]
+    ("POWERBI_TENANT_ID", TENANT_ID),
+    ("POWERBI_CLIENT_ID", CLIENT_ID),
+    ("POWERBI_CLIENT_SECRET", CLIENT_SECRET),
+    ("POWERBI_GROUP_ID", GROUP_ID),
+] if not v]
 if MISSING:
     raise RuntimeError(
         "Defina no .env (raiz do repo): "

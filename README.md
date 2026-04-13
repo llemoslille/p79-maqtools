@@ -76,6 +76,47 @@ Parâmetros de API e caminhos (`configuracoes/variaveis.py`, `config.yaml` quand
 
 Sempre a partir da **raiz** do repositório (`C:\Repositorio\lille\p79-maqtools`), para que `load_dotenv` e imports encontrem `.env` e `supabase_events.py`.
 
+### Docker (Linux)
+
+Pré-requisitos:
+
+- Docker Desktop (Windows) com engine Linux habilitada
+- Arquivo `.env` na raiz
+- Credencial GCP `machtools.json` na raiz (montada como volume read-only)
+
+Build da imagem:
+
+```powershell
+docker compose build
+```
+
+Executar **Omie Vendas**:
+
+```powershell
+docker compose run --rm omie-vendas
+```
+
+Executar **Omie Estoque**:
+
+```powershell
+docker compose run --rm omie-estoque
+```
+
+Passar argumentos para os entrypoints:
+
+```powershell
+docker compose run --rm omie-vendas vendas --camada silver
+docker compose run --rm omie-vendas vendas --script raw_clientes.py
+docker compose run --rm omie-estoque estoque --silver-only
+docker compose run --rm omie-estoque estoque --script nbronze_pedido.py
+```
+
+Observações:
+
+- A pasta `omie_estoque/maq_prod_estoque` é montada como volume para persistir arquivos de execução.
+- O `docker-entrypoint.sh` aceita `vendas` ou `estoque` como primeiro argumento.
+- O `docker-compose.yml` sobrescreve `GOOGLE_APPLICATION_CREDENTIALS` para `/app/machtools.json` dentro do container Linux.
+
 ### Omie Vendas
 
 Pipeline completo (ordem das camadas definida em `main_omie_vendas.py`: `raw` → `omie` → `silver` → `gold` → `modelo_semantico`):

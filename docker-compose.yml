@@ -1,0 +1,33 @@
+services:
+  omie-vendas:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: p79-maqtools:latest
+    container_name: p79-maqtools-vendas
+    env_file:
+      - .env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/machtools.json
+      GCS_CREDENTIALS_JSON_PATH: /app/machtools.json
+      MACHTOOLS_JSON_PATH: /app/machtools.json
+    volumes:
+      - ./machtools.json:/app/machtools.json:ro
+      - ./omie_estoque/maq_prod_estoque:/app/omie_estoque/maq_prod_estoque
+    command: ["vendas"]
+    restart: "no"
+
+  omie-estoque:
+    image: p79-maqtools:latest
+    container_name: p79-maqtools-estoque
+    env_file:
+      - .env
+    environment:
+      GOOGLE_APPLICATION_CREDENTIALS: /app/machtools.json
+      GCS_CREDENTIALS_JSON_PATH: /app/machtools.json
+      MACHTOOLS_JSON_PATH: /app/machtools.json
+    volumes:
+      - ./machtools.json:/app/machtools.json:ro
+      - ./omie_estoque/maq_prod_estoque:/app/omie_estoque/maq_prod_estoque
+    command: ["estoque"]
+    restart: "no"
